@@ -46,9 +46,9 @@ export const middleware = withAxiom(async (req: AxiomRequest) => {
                 JWKS = jose.createLocalJWKSet(JSON.parse(res.result));
                 req.log.info(`${EVENT_BASE_NAME} - read certs from redis`, { kid });
             } catch (error) {
-                const jwksRes = await fetch(
-                    `${IAM.baseUrl}/realms/${IAM.realm}/protocol/openid-connect/certs`
-                ).then(r => r.json());
+                const jwksRes = await fetch(`${IAM.baseUrl}/realms/${IAM.realm}/protocol/openid-connect/certs`).then(r =>
+                    r.json()
+                );
                 await fetch(`${REDIS.host}/set/${kid}/${encodeURIComponent(JSON.stringify(jwksRes))}`, {
                     headers: {
                         Authorization: `Bearer ${REDIS.token}`,
