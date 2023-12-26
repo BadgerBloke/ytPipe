@@ -34,7 +34,7 @@ const Hero: React.FC = () => (
                     Get Started
                 </Link>
                 <Link
-                    href="https://github.com/BadgerBloke"
+                    href="https://github.com/BadgerBloke/ytPipe"
                     target="_blank"
                     rel="noreferrer"
                     className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
