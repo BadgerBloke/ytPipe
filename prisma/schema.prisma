@@ -1,0 +1,215 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Channel {
+  id                 String            @id @default(uuid()) @db.Uuid
+  name               String            @db.VarChar(56)
+  members            UsersToChannels[]
+  isActive           Boolean           @default(true)
+  logo               String?           @db.VarChar(255)
+  contact            Contact?          @relation(fields: [contactId], references: [id])
+  contactId          String?           @db.Uuid
+  plan               Plan?             @relation("planRef", fields: [planId], references: [id])
+  planId             String?           @db.Uuid
+  activePlanValidity Order?            @relation("validityRef", fields: [planValidity, activeOrderId], references: [validTo, id])
+  planValidity       DateTime?         @db.Timestamp(6)
+  planPaymentRef     Payment?          @relation("paymentRef", fields: [planPaymentStatus, activeOrderId], references: [status, orderId])
+  planPaymentStatus  PaymentStatus?
+  activeOrder        Order?            @relation("activeOrderRef", fields: [activeOrderId, planId], references: [id, planId])
+  activeOrderId      String?           @db.Uuid
+  createdAt          DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt          DateTime          @updatedAt @db.Timestamp(6)
+  createdBy          UsersToChannels?  @relation("channelCreator", fields: [createdById], references: [id])
+  createdById        String?           @db.Uuid
+  updatedBy          UsersToChannels?  @relation("channelUpdator", fields: [updatedById], references: [id])
+  updatedById        String?           @db.Uuid
+}
+
+model User {
+  id               String            @id @default(uuid()) @db.Uuid
+  ssoUserId        String            @unique @db.Uuid
+  name             String            @db.VarChar(56)
+  email            String            @db.VarChar(255)
+  isActive         Boolean           @default(true)
+  avatar           String?           @db.VarChar(255)
+  contact          Contact?          @relation(fields: [contactId], references: [id])
+  contactId        String?           @db.Uuid
+  createdAt        DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt        DateTime          @updatedAt @db.Timestamp(6)
+  dbUserId         UsersToChannels[] @relation("dbUserIdRef")
+  ssoUserReference UsersToChannels[] @relation("ssoUserIdRef")
+
+  @@unique([ssoUserId, id])
+  @@index([id, ssoUserId])
+}
+
+model UsersToChannels {
+  id             String       @id @default(uuid()) @db.Uuid
+  user           User         @relation("dbUserIdRef", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId         String       @db.Uuid
+  ssoUser        User         @relation("ssoUserIdRef", fields: [ssoUserId, userId], references: [ssoUserId, id])
+  ssoUserId      String       @db.Uuid
+  channel        Channel      @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  channelId      String       @db.Uuid
+  isActive       Boolean      @default(true)
+  superAdminId   String?      @db.Uuid
+  roles          MemberRole[]
+  createdAt      DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime     @updatedAt @db.Timestamp(6)
+  channelCreator Channel[]    @relation("channelCreator")
+  channelUpdator Channel[]    @relation("channelUpdator")
+  orderCreator   Order[]      @relation("orderCreatedBy")
+  orderUpdator   Order[]      @relation("orderUpdatedBy")
+  paymentCreator Payment[]    @relation("paymentCreatedBy")
+  paymentUpdator Payment[]    @relation("paymentUpdatedBy")
+  contactCreator Contact[]    @relation("contactCreatedBy")
+  contactUpdator Contact[]    @relation("contactUpdatedBy")
+  planCreator    Plan[]       @relation("planCreatedBy")
+  planUpdator    Plan[]       @relation("planUpdatedBy")
+
+  @@index([userId, ssoUserId])
+}
+
+model Plan {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @db.VarChar(16)
+  code           YTPipePlanCode
+  stripePriceId  String          @db.VarChar(36)
+  description    String          @db.VarChar(255)
+  featuresDetail String          @db.VarChar(500)
+  price          Decimal         @db.Decimal(10, 2)
+  mrp            Decimal         @db.Decimal(10, 2)
+  currency       Currency
+  billingCycle   BillingCycle
+  isActive       Boolean         @default(true)
+  isDiscountable Boolean         @default(false)
+  createdAt      DateTime        @default(now()) @db.Timestamp(6)
+  createdBy      UsersToChannels @relation("planCreatedBy", fields: [createdById], references: [id])
+  createdById    String          @db.Uuid
+  updatedAt      DateTime        @updatedAt @db.Timestamp(6)
+  updatedBy      UsersToChannels @relation("planUpdatedBy", fields: [updatedById], references: [id])
+  updatedById    String          @db.Uuid
+  activePlanRef  Channel[]       @relation("planRef")
+  orders         Order[]         @relation("planRef")
+}
+
+model Order {
+  id                 String          @id @default(uuid()) @db.Uuid
+  totalAmount        Decimal         @db.Decimal(10, 2)
+  currency           Currency
+  isActive           Boolean         @default(true)
+  status             OrderStatus     @default(payment_not_initiated)
+  plan               Plan            @relation("planRef", fields: [planId], references: [id])
+  planId             String          @db.Uuid
+  validFrom          DateTime        @db.Timestamp(6)
+  validTo            DateTime        @db.Timestamp(6)
+  createdAt          DateTime        @default(now()) @db.Timestamp(6)
+  createdBy          UsersToChannels @relation("orderCreatedBy", fields: [createdById], references: [id])
+  createdById        String          @db.Uuid
+  updatedAt          DateTime        @updatedAt @db.Timestamp(6)
+  updatedBy          UsersToChannels @relation("orderUpdatedBy", fields: [updatedById], references: [id])
+  updatedById        String          @db.Uuid
+  payments           Payment[]
+  activeOrderId      Channel[]       @relation("activeOrderRef")
+  activePlanValidity Channel[]       @relation("validityRef")
+
+  @@unique([id, planId])
+  @@unique([validTo, id])
+}
+
+model Payment {
+  id                        String          @id @default(uuid()) @db.Uuid
+  amount                    Decimal         @db.Decimal(10, 2)
+  currency                  Currency
+  status                    PaymentStatus
+  isActive                  Boolean         @default(true)
+  checkoutSessionId         String          @db.VarChar(96)
+  subscriptionId            String          @db.VarChar(36)
+  invoiceId                 String          @db.VarChar(36)
+  customerId                String          @db.VarChar(36)
+  createdAt                 DateTime        @default(now()) @db.Timestamp(6)
+  createdBy                 UsersToChannels @relation("paymentCreatedBy", fields: [createdById], references: [id])
+  createdById               String          @db.Uuid
+  updatedAt                 DateTime        @updatedAt @db.Timestamp(6)
+  updatedBy                 UsersToChannels @relation("paymentUpdatedBy", fields: [updatedById], references: [id])
+  updatedById               String          @db.Uuid
+  order                     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId                   String          @db.Uuid
+  channelActiveOrderPayment Channel[]       @relation("paymentRef")
+
+  @@unique([status, orderId])
+}
+
+model Contact {
+  id           String          @id @default(uuid()) @db.Uuid
+  type         ContactType?    @default(alternate)
+  phone        String?         @db.VarChar(20)
+  addressLine1 String?         @db.VarChar(255)
+  addressLine2 String?         @db.VarChar(255)
+  city         String?         @db.VarChar(56)
+  postalCode   String?         @db.VarChar(16)
+  state        String?         @db.VarChar(56)
+  country      String?         @db.VarChar(48)
+  isActive     Boolean         @default(true)
+  Channel      Channel[]
+  User         User[]
+  createdAt    DateTime        @default(now()) @db.Timestamp(6)
+  createdBy    UsersToChannels @relation("contactCreatedBy", fields: [createdById], references: [id])
+  createdById  String          @db.Uuid
+  updatedAt    DateTime        @updatedAt @db.Timestamp(6)
+  updatedBy    UsersToChannels @relation("contactUpdatedBy", fields: [updatedById], references: [id])
+  updatedById  String          @db.Uuid
+}
+
+enum MemberRole {
+  owner
+  manager
+  reviewer
+  video_editor
+  content_editor
+}
+
+enum BillingCycle {
+  monthly
+  yearly
+}
+
+enum Currency {
+  INR
+  USD
+}
+
+enum OrderStatus {
+  payment_not_initiated
+  payment_initiated
+  payment_pending
+  payment_failed
+  payment_done
+}
+
+enum YTPipePlanCode {
+  basic
+  pro
+  biz
+}
+
+enum PaymentStatus {
+  initiated
+  pending
+  failed
+  done
+}
+
+enum ContactType {
+  primary
+  alternate
+}

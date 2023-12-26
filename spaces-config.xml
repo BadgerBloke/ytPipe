@@ -1,0 +1,14 @@
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <CORSRule>
+        <AllowedOrigin>http://localhost:5000</AllowedOrigin>
+        <AllowedMethod>PUT</AllowedMethod>
+        <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <ExposeHeader>ETag</ExposeHeader>
+    </CORSRule>
+    <CORSRule>
+        <AllowedOrigin>https://ytpipe.mksingh.in</AllowedOrigin>
+        <AllowedMethod>PUT</AllowedMethod>
+        <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <ExposeHeader>ETag</ExposeHeader>
+    </CORSRule>
+</CORSConfiguration>
