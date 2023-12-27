@@ -20,7 +20,7 @@ import {
     navigationMenuTriggerStyle,
 } from '~/components/ui/navigation-menu';
 import { Separator } from '~/components/ui/separator';
-import { MAIN_SITE } from '~/lib/config';
+import { IAM } from '~/lib/config';
 import { headerMenu } from '~/lib/constants/header-menus';
 import { UserData } from '~/lib/interfaces/user';
 import { cn } from '~/lib/utils';
@@ -95,12 +95,12 @@ const Header = ({ userData, channelId, className }: { userData?: UserData; chann
                                     asChild
                                     className="cursor-pointer bg-destructive text-destructive-foreground"
                                 >
-                                    <a href={`${MAIN_SITE.authBaseUrl}/api/logout`}>Logout</a>
+                                    <a href={`${IAM.baseUrl}/api/logout`}>Logout</a>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <Link className={buttonVariants()} href={`${MAIN_SITE.authBaseUrl}/login?callback=${pathname}`}>
+                        <Link className={buttonVariants()} href={`${IAM.baseUrl}/login?callback=${pathname}`}>
                             Log in
                         </Link>
                     )}
