@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-import { MAIN_SITE } from '~/lib/config';
+import { CLIENT } from '~/lib/config';
 import { getUserData } from '~/lib/tools/cookies-handler';
 import prisma from '~/services/prisma';
 import { stripe } from '~/services/stripe';
@@ -63,8 +63,8 @@ export const initiatePayment = async (orderId: string, stripePriceId: string, ch
         },
         // payment_method_types: ['card'],
         mode: 'subscription',
-        success_url: `${MAIN_SITE.baseUrl}/payment/success?success=true&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${MAIN_SITE.baseUrl}/payment/success?canceled=true&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${CLIENT.host}/payment/success?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${CLIENT.host}/payment/success?canceled=true&session_id={CHECKOUT_SESSION_ID}`,
     });
     return session;
 };

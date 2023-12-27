@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 
 import ThemeProvider from '~/components/theme-provider';
-import { Toaster } from '~/components/ui/toaster';
+import { Toaster } from '~/components/ui/sonner';
 import { cn } from '~/lib/utils';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -35,8 +35,8 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
                     fontHeading.variable
                 )}
             >
-                <Toaster />
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    <Toaster richColors />
                     {children}
                 </ThemeProvider>
             </body>

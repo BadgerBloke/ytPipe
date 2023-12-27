@@ -1,11 +1,10 @@
-export const MAIN_SITE = {
-    baseUrl: String(process.env.NEXT_PUBLIC_HOST_URL),
-    authBaseUrl: String(process.env.NEXT_PUBLIC_AUTH_BASE_URL),
-    domain: String(process.env.NEXT_PUBLIC_DOMAIN),
+export const CLIENT = {
+    host: String(process.env.NEXT_PUBLIC_CLIENT_HOST),
+    domain: String(process.env.CLIENT_DOMAIN),
 };
 
 export const IAM = {
-    baseUrl: String(process.env.IAM_BASE_URL),
+    baseUrl: String(process.env.NEXT_PUBLIC_IAM_BASE_URL),
     realm: String(process.env.IAM_REALM),
 };
 
@@ -21,4 +20,12 @@ export const REDIS = {
     url: String(process.env.REDIS_URL),
     token: String(process.env.REDIS_BEARER_TOKEN),
     host: String(process.env.REDIS_HOST),
+};
+
+export const COOKIES = {
+    authorization: 'Authorization',
+    providerAccessToken: 'Provider-Access-Token',
+    providerRefreshToken: 'Provider-Refresh-Token',
+    provider: 'Provider',
+    ORG_ID: 'Org-Id',
 };

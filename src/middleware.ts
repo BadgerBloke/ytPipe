@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { AxiomRequest, withAxiom } from 'next-axiom';
 import * as jose from 'jose';
 
-import { IAM, MAIN_SITE, REDIS } from './lib/config';
+import { IAM, REDIS } from './lib/config';
 // import { ytPipe } from './lib/constants/error-code';
 
 export const config = {
@@ -80,14 +80,13 @@ export const middleware = withAxiom(async (req: AxiomRequest) => {
             return NextResponse.next({ ...req });
         } catch (error) {
             req.log.info(`${EVENT_BASE_NAME} - jwt validation error, redirecting to login`, { error });
-            return NextResponse.redirect(
-                new URL(`/login?callback=${req.nextUrl.pathname}`, new URL(MAIN_SITE.authBaseUrl)),
-                { status: 307 }
-            );
+            return NextResponse.redirect(new URL(`/login?callback=${req.nextUrl.pathname}`, new URL(IAM.baseUrl)), {
+                status: 307,
+            });
         }
     }
     req.log.info(`${EVENT_BASE_NAME} - accessing private route without authorization cookie, redirecting to login`);
-    return NextResponse.redirect(new URL(`/login?callback=${req.nextUrl.pathname}`, new URL(MAIN_SITE.authBaseUrl)), {
+    return NextResponse.redirect(new URL(`/login?callback=${req.nextUrl.pathname}`, new URL(IAM.baseUrl)), {
         status: 307,
     });
 });
